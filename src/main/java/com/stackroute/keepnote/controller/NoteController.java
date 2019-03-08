@@ -2,6 +2,7 @@ package com.stackroute.keepnote.controller;
 import com.stackroute.keepnote.model.Note;
 import com.stackroute.keepnote.repository.NoteRepository;
 //import org.graalvm.compiler.lir.alloc.lsra.LinearScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -33,9 +34,18 @@ public class NoteController {
 	 * Retrieve the Note object from the context.
 	 * Retrieve the NoteRepository object from the context.
 	 */
-	ApplicationContext context=new ClassPathXmlApplicationContext("beans.xml");
-	Note note = (Note) context.getBean("note");
-	NoteRepository noteRepository = (NoteRepository) context.getBean("noteRepository");
+	public Note note;
+	public NoteRepository noteRepository;
+
+	@Autowired
+	public NoteController(Note note, NoteRepository noteRepository) {
+		this.note = note;
+		this.noteRepository = noteRepository;
+	}
+
+	public NoteController() {
+	}
+
 	/*Define a handler method to read the existing notes by calling the getAllNotes() method
 	 * of the NoteRepository class and add it to the ModelMap which is an implementation of Map
 	 * for use when building model data for use with views. it should map to the default URL i.e. "/" */
@@ -56,12 +66,13 @@ public class NoteController {
 	@RequestMapping("/saveNote")
 	public String saveNote(ModelMap model , @RequestParam("noteId") int noteId, @RequestParam("noteTitle") String noteTitle, @RequestParam("noteContent") String noteContent, @RequestParam("noteStatus") String noteStatus){
 		List<Note> notes;
-		note.setCreatedAt(LocalDateTime.now());
-		note.setNoteId(noteId);
-		note.setNoteTitle(noteTitle);
-		note.setNoteContent(noteContent);
-		note.setNoteStatus(noteStatus);
-		noteRepository.addNote(note);
+		Note newDetails=new Note();
+		newDetails.setCreatedAt(LocalDateTime.now());
+		newDetails.setNoteId(noteId);
+		newDetails.setNoteTitle(noteTitle);
+		newDetails.setNoteContent(noteContent);
+		newDetails.setNoteStatus(noteStatus);
+		noteRepository.addNote(newDetails);
 		notes=noteRepository.getAllNotes();
 		model.addAttribute("Notes",notes);
 		return "index";
